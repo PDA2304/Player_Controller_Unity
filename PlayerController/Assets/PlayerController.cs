@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+  
+
     public float moveSpeed;// Создание скорости передвижения
     public float jumpForce; //Создание высоты прыжков
     public Vector3 moveDirection;
@@ -14,9 +16,17 @@ public class PlayerController : MonoBehaviour
     public GameObject playerModel;
     public float rotateSpeed;
 
+    public Animator anim;
+
+    public static PlayerController instance;
+    private void Awake()
+    {
+        instance = this;
+    }
+
+
     private void Start()
     {
-        charController = GetComponent<CharacterController>();
         theCam = Camera.main;
     }
 
@@ -48,6 +58,9 @@ public class PlayerController : MonoBehaviour
             Quaternion newRotation = Quaternion.LookRotation(new Vector3(moveDirection.x, 0f, moveDirection.z));
             playerModel.transform.rotation = Quaternion.Slerp(playerModel.transform.rotation, newRotation, rotateSpeed * Time.deltaTime);
         }
+
+        anim.SetFloat("Speed", Mathf.Abs(moveDirection.x) + Mathf.Abs(moveDirection.z));
+        anim.SetBool("Grounded", charController.isGrounded);
 
     }
 
