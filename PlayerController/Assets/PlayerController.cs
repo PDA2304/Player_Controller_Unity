@@ -1,69 +1,57 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-  
+    public float moveSpeed; //Скорость передвижения 
+    public float jumpForce; //Высота прыжков 
+    public float gravityScale; //Сила гравитации 
+    public Animator anim; // 
+    public CharacterController controller; //Объект контроллера персонажа 
+    public GameObject playerModel;// 
+    public float rotateSpeed;// Скорость поворота камеры
+    private Vector3 _moveDirection;// Переменная отвечающая за движение
+    private Camera theCam; // Камера
 
-    public float moveSpeed;// Создание скорости передвижения
-    public float jumpForce; //Создание высоты прыжков
-    public Vector3 moveDirection;
-    public float gravityScale = 5f;
-    public CharacterController charController;
-
-    private Camera theCam;
-    public GameObject playerModel;
-    public float rotateSpeed;
-
-    public Animator anim;
-
-    public static PlayerController instance;
+    public static PlayerController instance; //переменная для переопределения класса
     private void Awake()
     {
         instance = this;
     }
-
-
-    private void Start()
+    void Start()
     {
         theCam = Camera.main;
     }
 
-    private void Update()
+    void Update()
     {
-        float yStore = moveDirection.y;
+        float yStore = _moveDirection.y;
+        //_moveDirection = new Vector3(Input.GetAxisRaw("Horizontal") * moveSpeed, _moveDirection.y, Input.GetAxisRaw("Vertical") * moveSpeed); 
+        _moveDirection = (transform.forward * Input.GetAxisRaw("Vertical")) + (transform.right * Input.GetAxisRaw("Horizontal"));
+        _moveDirection.Normalize();// Нормализация движения
+        _moveDirection = _moveDirection * moveSpeed;
+        _moveDirection.y = yStore;
 
-        moveDirection = (transform.forward * Input.GetAxisRaw("Vertical")) + (transform.right * Input.GetAxisRaw("Horizontal"));
-        moveDirection.Normalize();
-        moveDirection = moveDirection * moveSpeed;
-        moveDirection.y = yStore;
-
-        if (charController.isGrounded)
+        if (controller.isGrounded)
         {
-            moveDirection.y = 0f;
+            _moveDirection.y = 0f;
             if (Input.GetButtonDown("Jump"))
-            {
-                moveDirection.y = jumpForce;
-            }
-        }
+                _moveDirection.y = jumpForce;
+        }//Защита от Бесконечных прыжков
 
-        moveDirection.y += Physics.gravity.y * Time.deltaTime * gravityScale;
-
-        charController.Move(moveDirection * Time.deltaTime);
+        _moveDirection.y = _moveDirection.y + (Physics.gravity.y * gravityScale);//Гравитация
+        controller.Move(_moveDirection * Time.deltaTime);//скорость обновления
 
         if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
         {
             transform.rotation = Quaternion.Euler(0f, theCam.transform.rotation.eulerAngles.y, 0f);
-            Quaternion newRotation = Quaternion.LookRotation(new Vector3(moveDirection.x, 0f, moveDirection.z));
+            Quaternion newRotation = Quaternion.LookRotation(new Vector3(_moveDirection.x, 0f, _moveDirection.z));
             playerModel.transform.rotation = Quaternion.Slerp(playerModel.transform.rotation, newRotation, rotateSpeed * Time.deltaTime);
-        }
+        }//Корректное перемещение персонажа 
 
-        anim.SetFloat("Speed", Mathf.Abs(moveDirection.x) + Mathf.Abs(moveDirection.z));
-        anim.SetBool("Grounded", charController.isGrounded);
-
+        anim.SetFloat("Speed", Mathf.Abs(_moveDirection.x) + Mathf.Abs(_moveDirection.z));// для работы переменной которая отвечает за анимацию бега
+        anim.SetBool("Grounded", controller.isGrounded);// для работы переменной которая отвечает за анимацию прыжка
     }
-
 }
-
-
