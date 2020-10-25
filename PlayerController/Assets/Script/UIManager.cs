@@ -34,7 +34,6 @@ public class UIManager : MonoBehaviour
 
         if (fadeFromBlack)
         {
-
             blackScreen.color = new Color(blackScreen.color.r, blackScreen.color.g, blackScreen.color.b, Mathf.MoveTowards(blackScreen.color.a, 0f, fadeSpeed * Time.deltaTime));
             if (blackScreen.color.a == 0f)
             {

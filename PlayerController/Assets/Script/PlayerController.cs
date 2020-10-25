@@ -15,6 +15,13 @@ public class PlayerController : MonoBehaviour
     private Vector3 _moveDirection;// Переменная отвечающая за движение
     private Camera theCam; // Камера
 
+    public bool isKnocking;
+    public float knockBackLength = .5f;
+    private float knockbackCounter;
+    public Vector2 knockbackPower;
+
+    public GameObject[] playerPrieces;
+
     public static PlayerController instance; //переменная для переопределения класса
     private void Awake()
     {
@@ -28,30 +35,62 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         float yStore = _moveDirection.y;
-        //_moveDirection = new Vector3(Input.GetAxisRaw("Horizontal") * moveSpeed, _moveDirection.y, Input.GetAxisRaw("Vertical") * moveSpeed); 
-        _moveDirection = (transform.forward * Input.GetAxisRaw("Vertical")) + (transform.right * Input.GetAxisRaw("Horizontal"));
-        _moveDirection.Normalize();// Нормализация движения
-        _moveDirection = _moveDirection * moveSpeed;
-        _moveDirection.y = yStore;
-
-        if (controller.isGrounded)
+        if (!isKnocking)
         {
-            _moveDirection.y = 0f;
-            if (Input.GetButtonDown("Jump"))
-                _moveDirection.y = jumpForce;
-        }//Защита от Бесконечных прыжков
+            //_moveDirection = new Vector3(Input.GetAxisRaw("Horizontal") * moveSpeed, _moveDirection.y, Input.GetAxisRaw("Vertical") * moveSpeed); 
+            _moveDirection = (transform.forward * Input.GetAxisRaw("Vertical")) + (transform.right * Input.GetAxisRaw("Horizontal"));
+            _moveDirection.Normalize();// Нормализация движения
+            _moveDirection = _moveDirection * moveSpeed;
+            _moveDirection.y = yStore;
 
-        _moveDirection.y = _moveDirection.y + (Physics.gravity.y * gravityScale);//Гравитация
-        controller.Move(_moveDirection * Time.deltaTime);//скорость обновления
+            if (controller.isGrounded)
+            {
+                _moveDirection.y = 0f;
+                if (Input.GetButtonDown("Jump"))
+                    _moveDirection.y = jumpForce;
+            }//Защита от Бесконечных прыжков
 
-        if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
+            _moveDirection.y = _moveDirection.y + (Physics.gravity.y * gravityScale);//Гравитация
+            controller.Move(_moveDirection * Time.deltaTime);//скорость обновления
+
+            if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
+            {
+                transform.rotation = Quaternion.Euler(0f, theCam.transform.rotation.eulerAngles.y, 0f);
+                Quaternion newRotation = Quaternion.LookRotation(new Vector3(_moveDirection.x, 0f, _moveDirection.z));
+                playerModel.transform.rotation = Quaternion.Slerp(playerModel.transform.rotation, newRotation, rotateSpeed * Time.deltaTime);
+            }//Корректное перемещение персонажа 
+        }
+        if(isKnocking)
         {
-            transform.rotation = Quaternion.Euler(0f, theCam.transform.rotation.eulerAngles.y, 0f);
-            Quaternion newRotation = Quaternion.LookRotation(new Vector3(_moveDirection.x, 0f, _moveDirection.z));
-            playerModel.transform.rotation = Quaternion.Slerp(playerModel.transform.rotation, newRotation, rotateSpeed * Time.deltaTime);
-        }//Корректное перемещение персонажа 
+            knockbackCounter -= Time.deltaTime;
+            _moveDirection = playerModel.transform.forward * -knockbackPower.x;
+            _moveDirection.y = yStore;
 
+            if (controller.isGrounded)
+            {
+                _moveDirection.y = 0f;
+            }
+
+            _moveDirection.y += Physics.gravity.y * Time.deltaTime * gravityScale;
+
+            controller.Move(_moveDirection * Time.deltaTime);
+
+            if (knockbackCounter <= 0)
+            {
+                isKnocking = false;
+            }
+        }
         anim.SetFloat("Speed", Mathf.Abs(_moveDirection.x) + Mathf.Abs(_moveDirection.z));// для работы переменной которая отвечает за анимацию бега
         anim.SetBool("Grounded", controller.isGrounded);// для работы переменной которая отвечает за анимацию прыжка
     }
+
+    public void Knockback()
+    {
+        isKnocking = true;
+        knockbackCounter = knockBackLength;
+        _moveDirection.y = knockbackPower.y;
+        controller.Move(_moveDirection * Time.deltaTime);
+    }
+
+
 }
