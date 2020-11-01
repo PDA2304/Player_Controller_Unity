@@ -35,5 +35,6 @@ public class HealthPickup : MonoBehaviour
             }
         }
         Instantiate(deathEffect, PlayerController.instance.transform.position + new Vector3(0f, 1f, 0f), PlayerController.instance.transform.rotation);
+        AudioManager.instance.PlaySFX(6);
     }
 }

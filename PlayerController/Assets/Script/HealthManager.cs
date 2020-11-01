@@ -11,6 +11,8 @@ public class HealthManager : MonoBehaviour
     public int currentHealth, maxHealth;
     // Start is called before the first frame update
 
+    public Sprite[] healtBarImages;
+
     private void Awake()
     {
         instance = this;
@@ -20,6 +22,49 @@ public class HealthManager : MonoBehaviour
     void Start()
     {
         currentHealth = maxHealth;
+        UpdateUI();
+    }
+
+    public void UpdateUI()
+    {
+        UIManager.instance.healthText.text = currentHealth.ToString();
+
+        switch (currentHealth)
+        {
+            case 5:
+                {
+                    UIManager.instance.healthImage.enabled = true;
+                    UIManager.instance.healthImage.sprite = healtBarImages[4];
+                    break;
+                }
+            case 4:
+                {
+                    UIManager.instance.healthImage.sprite = healtBarImages[3];
+                    break;
+                }
+            case 3:
+                {
+                    UIManager.instance.healthImage.enabled = true;
+                    UIManager.instance.healthImage.sprite = healtBarImages[2];
+                    break;
+                }
+            case 2:
+                {
+                    UIManager.instance.healthImage.sprite = healtBarImages[1];
+                    break;
+                }
+            case 1:
+                {
+                    UIManager.instance.healthImage.sprite = healtBarImages[0];
+                    break;
+                }
+            case 0:
+                {
+                    UIManager.instance.healthImage.enabled = false;
+                    break;
+                }
+        }
+
     }
 
     // Update is called once per frame
@@ -66,13 +111,21 @@ public class HealthManager : MonoBehaviour
                 PlayerController.instance.Knockback();
                 invincCounter = invincibleLength;
             }
+            UpdateUI();
         }
-
     }
 
     public void ResetHealth()
     {
         currentHealth = maxHealth;
+        UIManager.instance.healthImage.enabled = true;
+        UpdateUI();
+    }
+
+    public void PlayerKilled()
+    {
+        currentHealth = 0;
+        UpdateUI();
     }
 
     public void AddHealth(int amountToHeal)
@@ -82,6 +135,7 @@ public class HealthManager : MonoBehaviour
         {
             currentHealth = maxHealth;
         }
+        UpdateUI();
     }
 
 }

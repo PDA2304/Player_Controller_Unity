@@ -9,7 +9,11 @@ public class UIManager : MonoBehaviour
     public Image blackScreen;
     public float fadeSpeed = 1f;
     public bool fadeToBlack, fadeFromBlack;
-
+    public Text healthText;
+    public Image healthImage;
+    public Text coinText;
+    public GameObject pauseScreen, optionsScreen;
+    public Slider musicVolSlider, sfxVolSlider;
     public void Awake()
     {
         instance = this;
@@ -17,7 +21,43 @@ public class UIManager : MonoBehaviour
     void Start()
     {
         fadeFromBlack = true;
+        pauseScreen.SetActive(false);
     }
+
+    public void Rescume()
+    {
+        GameManager.instance.PauseUnpause();
+    }
+
+    public void LevelSelect()
+    {
+
+    }
+    public void SetMusicLevel()
+    {
+        AudioManager.instance.SetMusicLevel();
+    }
+
+    public void SetSFXLevel()
+    {
+        AudioManager.instance.SetSFXLevel();
+    }
+
+    public void MainMenu()
+    { 
+    
+    }
+
+    public void OpenOptions()
+    {
+        optionsScreen.SetActive(true);
+    }
+
+    public void CloseOptions()
+    {
+        optionsScreen.SetActive(false);
+    }
+
 
     // Update is called once per frame
     void Update()

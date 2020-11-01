@@ -32,6 +32,7 @@ public class Checkpoint : MonoBehaviour
 
             cpOff.SetActive(false);
             cpOn.SetActive(true);
+            AudioManager.instance.PlaySFX(3);
         }
 
     }

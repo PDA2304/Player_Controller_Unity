@@ -21,6 +21,7 @@ public class HurtPlayer : MonoBehaviour
         if (other.tag == "Player")
         {
             HealthManager.instance.Hurt();
+            AudioManager.instance.PlaySFX(7);
         }
         
     }
