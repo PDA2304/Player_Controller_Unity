@@ -23,6 +23,15 @@ public class UIManager : MonoBehaviour
         fadeFromBlack = true;
         pauseScreen.SetActive(false);
     }
+    public void SetMusicLevel()
+    {
+        AudioManager.instance.SetMusicLevel();
+    }
+
+    public void SetSFXLevel()
+    {
+        AudioManager.instance.SetSFXLevel();
+    }
 
     public void Rescume()
     {
@@ -32,15 +41,6 @@ public class UIManager : MonoBehaviour
     public void LevelSelect()
     {
 
-    }
-    public void SetMusicLevel()
-    {
-        AudioManager.instance.SetMusicLevel();
-    }
-
-    public void SetSFXLevel()
-    {
-        AudioManager.instance.SetSFXLevel();
     }
 
     public void MainMenu()

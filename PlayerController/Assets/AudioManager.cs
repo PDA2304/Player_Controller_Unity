@@ -60,8 +60,6 @@ public class AudioManager : MonoBehaviour
 
     public void PlaySFX(int sfxToPlay)
     {
-
-        //инача   
         sfx[sfxToPlay].Play();
     }
 
