@@ -22,6 +22,13 @@ public class PlayerController : MonoBehaviour
 
     public GameObject[] playerPrieces;
 
+    public float bounceForce = 8f;
+    public void Bounce()
+    {
+        _moveDirection.y = bounceForce;
+        controller.Move(_moveDirection * Time.deltaTime);
+    }
+
     public static PlayerController instance; //переменная для переопределения класса
     private void Awake()
     {
