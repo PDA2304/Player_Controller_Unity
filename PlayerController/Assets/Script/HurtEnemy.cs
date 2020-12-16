@@ -7,21 +7,20 @@ public class HurtEnemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Enemy")
+        if(other.tag == "Enemy")
         {
-            other.GetComponent<EnemyHealthManager>().TakeDamage(); //если сталкнемся с этим триггером, то вызвать функцию уничтожения скелета.
+            other.GetComponent<EnemyHealthManager>().TakeDamage();
         }
     }
-
 }

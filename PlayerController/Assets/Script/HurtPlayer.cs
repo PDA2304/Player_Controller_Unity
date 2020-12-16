@@ -18,12 +18,9 @@ public class HurtPlayer : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Player")
+        if(other.tag == "Player")
         {
             HealthManager.instance.Hurt();
-            AudioManager.instance.PlaySFX(7);
         }
-        
     }
-  
 }

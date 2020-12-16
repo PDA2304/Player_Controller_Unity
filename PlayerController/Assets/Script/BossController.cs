@@ -1,0 +1,101 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class BossController : MonoBehaviour
+{
+    public static BossController instance;
+
+    public Animator anim;
+
+    public GameObject victoryZone; //объект, что появиться в случае победы над роботом
+    public float waitToShowExit; //время перед ожиданием демонстрации выхода
+
+    public enum BossPhase { intro, phase1, phase2, phase3, end }; //поведение робота при атаке
+    public BossPhase currentPhase = BossPhase.intro; //начальное действие
+
+    public int bossMusic, bossDeath, bossDeathShout, bossHit; //музыка для действий робота
+
+    private void Awake()
+    {
+        instance = this;
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        //AudioManager.instance.PlayMusic(bossMusic);
+    }
+
+    private void OnEnable()
+    {
+        AudioManager.instance.PlayMusic(bossMusic); // если активирован
+    }
+
+    // Update is called once per frame
+    void Update()
+    { //управление анимацией
+        if (GameManager.instance.isRespawning)
+        {
+            currentPhase = BossPhase.intro;
+
+            anim.SetBool("Phase1", false);
+            anim.SetBool("Phase2", false);
+            anim.SetBool("Phase3", false);
+
+            AudioManager.instance.PlayMusic(AudioManager.instance.levelMusicToPlay);
+
+            gameObject.SetActive(false);
+
+            BossActivator.instance.gameObject.SetActive(true);
+            BossActivator.instance.entrance.SetActive(true);
+
+            GameManager.instance.isRespawning = false;
+
+        }
+    }
+
+    public void DamageBoss()
+    {
+        AudioManager.instance.PlaySFX(bossHit);
+
+        currentPhase++;
+
+        if (currentPhase != BossPhase.end)
+        {
+            anim.SetTrigger("Hurt");
+        }
+
+        switch (currentPhase) //движение робота
+        {
+            case BossPhase.phase1:
+                anim.SetBool("Phase1", true);
+                break;
+
+            case BossPhase.phase2:
+                anim.SetBool("Phase2", true);
+                anim.SetBool("Phase1", false);
+                break;
+
+            case BossPhase.phase3:
+                anim.SetBool("Phase3", true);
+                anim.SetBool("Phase2", false);
+                break;
+
+            case BossPhase.end:
+                anim.SetTrigger("End");
+                StartCoroutine(EndBoss());
+                break;
+        }
+    }
+
+    IEnumerator EndBoss() //что делать, если герой победил
+    {
+        AudioManager.instance.PlaySFX(bossDeath);
+        AudioManager.instance.PlaySFX(bossDeathShout);
+        AudioManager.instance.PlayMusic(AudioManager.instance.levelMusicToPlay);
+        yield return new WaitForSeconds(waitToShowExit);
+        victoryZone.SetActive(true);
+    }
+}
+

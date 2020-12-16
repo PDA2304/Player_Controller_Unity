@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class EnemyHealthManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    public int maxHealth = 1; //количество жизней
-    private int currentHealth; //текущая жизнь
-    public GameObject Coins_deathEffect;
-    public int deathSound; //мелодия разрушения
+    public int maxHealth = 1;
+    private int currentHealth;
+
+    public int deathSound;
+
+    public GameObject deathEffect, itemToDrop;
 
     // Start is called before the first frame update
     void Start()
@@ -19,20 +20,23 @@ public class EnemyHealthManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        
     }
 
-    public void  TakeDamage()
+    public void TakeDamage()
     {
-        currentHealth--; //если, жизни будут уменьшаться, тогда играть мелодию и уничтожать скелет
+        currentHealth--;
 
-        if (currentHealth <= 0)
+        if(currentHealth <= 0)
         {
-            AudioManager.instance.PlaySFX(deathSound); //мелодия разрушения
-            Destroy(gameObject); //уничтожение объекта
-            Instantiate(Coins_deathEffect, EnemyController.enemy.transform.position + new Vector3(0f, 1f, 0f), EnemyController.enemy.transform.rotation);
+            AudioManager.instance.PlaySFX(deathSound);
+
+            Destroy(gameObject);
+
             PlayerController.instance.Bounce();
+
+            Instantiate(deathEffect, transform.position + new Vector3(0, 1.2f, 0f), transform.rotation);
+            Instantiate(itemToDrop, transform.position + new Vector3(0, .5f, 0f), transform.rotation);
         }
     }
-
 }

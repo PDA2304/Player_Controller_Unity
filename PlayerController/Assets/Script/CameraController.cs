@@ -1,18 +1,19 @@
-﻿using Cinemachine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class CameraController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    public static CameraController instance; //переменная для переопределения класса
-    public CinemachineBrain theCMBrain; // переменная для камеры при возраждении
+    public static CameraController instance;
+
+    public CinemachineBrain theCMBrain;
+
     private void Awake()
     {
         instance = this;
     }
-
+    // Start is called before the first frame update
     void Start()
     {
         

@@ -4,8 +4,13 @@ using UnityEngine;
 
 public class Checkpoint : MonoBehaviour
 {
-    // Start is called before the first frame update
     public GameObject cpOn, cpOff;
+
+    //public Checkpoint[] cps;
+
+    public int soundToPlay;
+
+    // Start is called before the first frame update
     void Start()
     {
         
@@ -19,12 +24,12 @@ public class Checkpoint : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Player")
+        if(other.tag == "Player")
         {
             GameManager.instance.SetSpawnPoint(transform.position);
 
             Checkpoint[] allCP = FindObjectsOfType<Checkpoint>();
-            for (int i = 0; i < allCP.Length; i++)
+            for(int i = 0; i < allCP.Length; i++)
             {
                 allCP[i].cpOff.SetActive(true);
                 allCP[i].cpOn.SetActive(false);
@@ -32,9 +37,8 @@ public class Checkpoint : MonoBehaviour
 
             cpOff.SetActive(false);
             cpOn.SetActive(true);
-            AudioManager.instance.PlaySFX(3);
+
+            AudioManager.instance.PlaySFX(soundToPlay);
         }
-
     }
-
 }

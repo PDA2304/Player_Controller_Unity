@@ -6,32 +6,24 @@ using UnityEngine.AI;
 public class EnemyController : MonoBehaviour
 {
     public Transform[] patrolPoints;
-    public int currentPatrolPoints;
-    public NavMeshAgent Agent;
+    public int currentPatrolPoint;
+
+    public NavMeshAgent agent;
+
     public Animator anim;
-
-    public static EnemyController enemy;
-
-    private void Awake()
-    {
-        enemy = this;
-    }
 
     public enum AIState
     {
-        isIdle,
-        isPatrolling,
-        isChasing,
-        isAttacking
+        isIdle, isPatrolling, isChasing, isAttacking
     };
-
     public AIState currentState;
+
     public float waitAtPoint = 2f;
     private float waitCounter;
 
     public float chaseRange;
 
-    public float attackRange = 2f;
+    public float attackRange = 1f;
     public float timeBetweenAttacks = 2f;
     private float attackCounter;
 
@@ -49,100 +41,102 @@ public class EnemyController : MonoBehaviour
         switch (currentState)
         {
             case AIState.isIdle:
+                anim.SetBool("IsMoving", false);
+
+                if (waitCounter > 0)
                 {
-                    anim.SetBool("IsMoving", false);
-
-                    if (waitCounter > 0)
-                    {
-                        waitCounter -= Time.deltaTime;
-                    }
-                    else
-                    {
-                        currentState = AIState.isPatrolling;
-                        Agent.SetDestination(patrolPoints[currentPatrolPoints].position);
-                    }
-
-                    if (distanceToPlayer <= chaseRange)
-                    {
-                        currentState = AIState.isChasing;
-                        anim.SetBool("IsMoving", true);
-                    }
-
-                    break;
+                    waitCounter -= Time.deltaTime;
+                } else
+                {
+                    currentState = AIState.isPatrolling;
+                    agent.SetDestination(patrolPoints[currentPatrolPoint].position);
                 }
-            case AIState.isPatrolling:
+
+                if (distanceToPlayer <= chaseRange)
                 {
-                    if (Agent.remainingDistance <= .2f)
-                    {
-                        currentPatrolPoints++;
-                        if (currentPatrolPoints >= patrolPoints.Length)
-                        {
-                            currentPatrolPoints = 0;
-                        }
-
-                        currentState = AIState.isIdle;
-                        waitCounter = waitAtPoint;
-                    }
-
-                    if (distanceToPlayer <= chaseRange)
-                    {
-                        currentState = AIState.isChasing;
-                    }
-
+                    currentState = AIState.isChasing;
                     anim.SetBool("IsMoving", true);
-
-                    break;
                 }
+
+
+                break;
+
+            case AIState.isPatrolling:
+
+                //agent.SetDestination(patrolPoints[currentPatrolPoint].position);
+
+                if (agent.remainingDistance <= .2f)
+                {
+                    currentPatrolPoint++;
+                    if (currentPatrolPoint >= patrolPoints.Length)
+                    {
+                        currentPatrolPoint = 0;
+                    }
+
+                    //agent.SetDestination(patrolPoints[currentPatrolPoint].position);
+                    currentState = AIState.isIdle;
+                    waitCounter = waitAtPoint;
+                }
+
+                if (distanceToPlayer <= chaseRange)
+                {
+                    currentState = AIState.isChasing;
+                }
+
+                anim.SetBool("IsMoving", true);
+
+                break;
 
             case AIState.isChasing:
+
+                agent.SetDestination(PlayerController.instance.transform.position);
+
+                if(distanceToPlayer <= attackRange)
                 {
-                    Agent.SetDestination(PlayerController.instance.transform.position);
-                    if (distanceToPlayer <= attackRange)
+                    currentState = AIState.isAttacking;
+                    anim.SetTrigger("Attack");
+                    anim.SetBool("IsMoving", false);
+
+                    agent.velocity = Vector3.zero;
+                    agent.isStopped = true;
+
+                    attackCounter = timeBetweenAttacks;
+                }
+
+                if(distanceToPlayer > chaseRange)
+                {
+                    currentState = AIState.isIdle;
+                    waitCounter = waitAtPoint;
+
+                    agent.velocity = Vector3.zero;
+                    agent.SetDestination(transform.position);
+                }
+
+
+                break;
+
+            case AIState.isAttacking:
+
+                transform.LookAt(PlayerController.instance.transform, Vector3.up);
+                transform.rotation = Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f);
+
+                attackCounter -= Time.deltaTime;
+                if(attackCounter <= 0)
+                {
+                    if(distanceToPlayer < attackRange)
                     {
-                        currentState = AIState.isAttacking;
                         anim.SetTrigger("Attack");
-                        anim.SetBool("IsMoving", false);
-
-                        Agent.velocity = Vector3.zero;
-                        Agent.isStopped = true;
-
                         attackCounter = timeBetweenAttacks;
-                    }
-                    if (distanceToPlayer > chaseRange)
+                    } else
                     {
                         currentState = AIState.isIdle;
                         waitCounter = waitAtPoint;
 
-                        Agent.velocity = Vector3.zero;
-                        Agent.SetDestination(transform.position);
+                        agent.isStopped = false;
                     }
-                    break;
                 }
 
-            case AIState.isAttacking:
-                {
-                    transform.LookAt(PlayerController.instance.transform, Vector3.up);
-                    transform.rotation = Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f);
-
-                    attackCounter -= Time.deltaTime;
-                    if (attackCounter <= 0)
-                    {
-                        if (distanceToPlayer < attackRange)
-                        {
-                            anim.SetTrigger("Attack");
-                            attackCounter = timeBetweenAttacks;
-                        }
-                        else
-                        {
-                            currentState = AIState.isIdle;
-                            waitCounter = waitAtPoint;
-
-                            Agent.isStopped = false;
-                        }
-                    }
-                    break;
-                }
+                break;
         }
-
     }
 }
